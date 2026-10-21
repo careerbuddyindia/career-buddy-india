@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Career Buddy India",
-    "slug": "career-buddy-india",
+    "slug": "careerbuddyindiaofficial",
+    "owner": "careerbuddyindiaofficials-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -20,7 +21,10 @@
     },
     "extra": {
       "supabaseUrl": "https://nstiphfmvzryboconnsa.supabase.co",
-      "supabaseAnonKey": "sb_publishable_pq8K8lvcxbz_RIvtROzWlg_G1CudZsb"
+      "supabaseAnonKey": "sb_publishable_pq8K81vcxbz_RIvtROzWlg_G1CudZsb",
+      "eas": {
+        "projectId": "a920c535-b954-4892-b29f-051ec189aeb3"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -49,3 +53,4 @@
     }
   }
 }
+

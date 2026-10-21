@@ -18,10 +18,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Job, JobCard } from "@/src/components/job-card";
-import { NotificationModal } from "@/src/components/notification-modal";
-import { supabase } from "@/src/lib/supabase";
-import { makeStyles, useTheme } from "@/src/theme";
+import { Job, JobCard } from "../src/components/job-card";
+import { NotificationModal } from "../src/components/notification-modal";
+import { supabase } from "../src/lib/supabase";
+import { makeStyles, useTheme } from "../src/theme";
+
 
 type Category = "All" | "Government" | "Private";
 const categories: Category[] = ["All", "Government", "Private"];

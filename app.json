@@ -5,7 +5,7 @@
     "owner": "careerbuddyindiaofficials-team",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.jpg",
+    "icon": "./assets/images/icon.png",
     "scheme": "careerbuddyindia",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -14,17 +14,17 @@
     },
     "android": {
       "package": "com.emergent.careerbuddy.jlsa7a",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.jpg",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#007AFF"
       }
     },
     "extra": {
       "supabaseUrl": "https://nstiphfmvzryboconnsa.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zdGlwaGZtdnpyeWJvY29ubnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzY4NTAsImV4cCI6MjA1NjgxMjg1MH0.b6c9F8j4h4X_9i33J3l-1kM5M3sV64F-2G_hG_n3h_E",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zdGlwaGZtdnpyeWJvY29ubnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTQ5MDQsImV4cCI6MjEwODA5MDkwNH0.aDzjs2-EakDdPxjUVla8rHQZ4lqOYF9W3X03jK6i5Pk",
       "eas": {
-        "projectId": "a920c535-b954-4892-b29f-051ec189aeb3"
+        "projectId": "a92dc535-b954-4892-b29f-051ec189aeb5"
       }
     },
     "web": {

@@ -5,6 +5,7 @@
     "owner": "careerbuddyindiaofficials-team",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/icon.jpg",
     "scheme": "careerbuddyindia",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,6 +13,10 @@
       "bundleIdentifier": "com.emergent.careerbuddy.jlso7a"
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.jpg",
+        "backgroundColor": "#007AFF"
+      },
       "package": "com.emergent.careerbuddy.jlso7a"
     },
     "extra": {

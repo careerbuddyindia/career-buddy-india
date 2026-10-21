@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,6 +36,7 @@ const sortJobs = (items: Job[]) =>
   });
 
 export default function Index() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useStyles();
@@ -184,8 +186,37 @@ export default function Index() {
         <Text style={styles.subtitle}>
           Browse verified openings across government and private organizations.
         </Text>
-      </View>
-
+        </View>
+              <Pressable 
+          style={{
+            backgroundColor: '#4F46E5',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 12,
+            marginHorizontal: 16,
+            marginBottom: 14,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 }
+          }}
+          onPress={() => router.push('/resources')}
+        >
+          <View>
+            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 14 }}>
+              Career Toolkit & Templates 📋
+            </Text>
+            <Text style={{ color: '#E0E7FF', fontSize: 12, marginTop: 2 }}>
+              Leave Applications, Emails & Interview Prep
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+        </Pressable>
+      
       <View style={styles.searchBar}>
         <Ionicons name="search-outline" size={20} color={styles.searchIcon.color} />
         <TextInput

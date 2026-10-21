@@ -31,14 +31,13 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": [
+    plugins": [
       "expo-router",
       "expo-font",
       "expo-image",
       "expo-secure-store",
       "expo-web-browser",
-      "expo-status-bar",
-      "expo-clipboard"
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

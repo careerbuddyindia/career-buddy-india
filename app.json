@@ -31,7 +31,7 @@
       "bundler": "metro",
       "output": "single"
     },
-    plugins": [
+    "plugins": [
       "expo-router",
       "expo-font",
       "expo-image",

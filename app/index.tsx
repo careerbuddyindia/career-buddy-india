@@ -7,7 +7,6 @@ import {
   Alert,
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   Linking,
   Platform,
   Pressable,
@@ -20,26 +19,27 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Job, JobCard } from "../src/components/job-card";
-import { NotificationModal } from "../src/components/notification-modal";
+import NotificationModal from "../src/components/notification-modal";
 import { supabase } from "../src/lib/supabase";
 import { makeStyles, useTheme } from "../src/theme";
-
 
 type Category = "All" | "Government" | "Private";
 const categories: Category[] = ["All", "Government", "Private"];
 
-const sortJobs = (items: Job[]) =>
-  [...items].sort((a, b) => {
+const sortJobs = (items: Job[]) => {
+  return [...items].sort((a, b) => {
     const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
     const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
     return bTime - aTime;
   });
+};
 
 export default function Index() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useStyles();
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category>("All");
@@ -60,8 +60,11 @@ export default function Index() {
       )
       .order("created_at", { ascending: false });
 
-    if (queryError) setError(queryError.message);
-    else setJobs(sortJobs((data ?? []) as Job[]));
+    if (queryError) {
+      setError(queryError.message);
+    } else {
+      setJobs(sortJobs((data ?? []) as Job[]));
+    }
 
     if (isRefresh) setRefreshing(false);
     else setLoading(false);
@@ -69,31 +72,31 @@ export default function Index() {
 
   useEffect(() => {
     void loadJobs();
+  }, [loadJobs]);
 
-    const handleChange = (payload: RealtimePostgresChangesPayload<Job>) => {
-      if (payload.eventType === "INSERT") {
-        setJobs((current) =>
-          current.some((job) => String(job.id) === String(payload.new.id))
-            ? current
-            : sortJobs([payload.new as Job, ...current])
-        );
-      }
-      if (payload.eventType === "UPDATE") {
-        setJobs((current) =>
-          sortJobs(
-            current.map((job) =>
-              String(job.id) === String(payload.new.id) ? (payload.new as Job) : job
-            )
+  const handleChange = (payload: RealtimePostgresChangesPayload<Job>) => {
+    if (payload.eventType === "INSERT") {
+      setJobs((current) =>
+        current.some((job) => String(job.id) === String(payload.new.id))
+          ? current
+          : sortJobs([payload.new as Job, ...current])
+      );
+    } else if (payload.eventType === "UPDATE") {
+      setJobs((current) =>
+        sortJobs(
+          current.map((job) =>
+            String(job.id) === String(payload.new.id) ? (payload.new as Job) : job
           )
-        );
-      }
-      if (payload.eventType === "DELETE") {
-        setJobs((current) =>
-          current.filter((job) => String(job.id) !== String(payload.old.id))
-        );
-      }
-    };
+        )
+      );
+    } else if (payload.eventType === "DELETE") {
+      setJobs((current) =>
+        current.filter((job) => String(job.id) !== String(payload.old.id))
+      );
+    }
+  };
 
+  useEffect(() => {
     const channel = supabase
       .channel("public:jobs")
       .on(
@@ -110,13 +113,14 @@ export default function Index() {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [loadJobs]);
+  }, []);
 
   const filteredJobs = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return jobs.filter((job) => {
       const matchesCategory =
         category === "All" || job.category?.toLowerCase() === category.toLowerCase();
+
       const searchable = [
         job.title,
         job.organization,
@@ -127,6 +131,7 @@ export default function Index() {
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
+
       return (
         matchesCategory &&
         (!normalizedQuery || searchable.includes(normalizedQuery))
@@ -149,462 +154,418 @@ export default function Index() {
     }
   };
 
-  const resetFilters = () => {
-    setQuery("");
-    setCategory("All");
+  const getCategoryCount = (cat: Category) => {
+    if (cat === "All") return jobs.length;
+    return jobs.filter((j) => j.category?.toLowerCase() === cat.toLowerCase()).length;
   };
 
-  const header = (
-    <View>
-      <View style={styles.header}>
-        <View style={styles.brandLockup}>
-          <View style={styles.brandMark}>
-            <Ionicons name="briefcase" size={18} color={colors.onBrandPrimary} />
-          </View>
-          <View>
-            <Text style={styles.eyebrow}>YOUR NEXT MOVE</Text>
-            <Text style={styles.title}>Career Buddy India</Text>
-          </View>
-        </View>
-        <Pressable
-          accessibilityLabel="Open notifications"
-          accessibilityRole="button"
+  const renderHeader = () => (
+    <View style={styles.headerWrapper}>
+      {/* 1. Top Bar: Menu, Search & Bell */}
+      <View style={[styles.topBar, { paddingTop: Math.max(insets.top, 12) }]}>
+        <Pressable 
+          style={styles.circleIconBtn}
+          accessibilityLabel="Open Menu"
           onPress={() => setNotificationsVisible(true)}
-          style={({ pressed }) => [
-            styles.notificationButton,
-            pressed && styles.pressed,
-          ]}
-          testID="notifications-button"
         >
-          <Ionicons name="notifications-outline" size={22} color={styles.notificationIcon.color} />
-          {jobs.length > 0 ? <View style={styles.notificationDot} /> : null}
+          <Ionicons name="menu-outline" size={24} color="#1E293B" />
         </Pressable>
-      </View>
 
-      <View style={styles.introBlock}>
-        <Text style={styles.heading}>Find work that moves you forward.</Text>
-        <Text style={styles.subtitle}>
-          Browse verified openings across government and private organizations.
-        </Text>
-        </View>
-              <Pressable 
-          style={{
-            backgroundColor: '#4F46E5',
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-            borderRadius: 12,
-            marginHorizontal: 16,
-            marginBottom: 14,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            elevation: 2,
-            shadowColor: '#000',
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 }
-          }}
-          onPress={() => router.push('/resources')}
-        >
-          <View>
-            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 14 }}>
-              Career Toolkit & Templates 📋
-            </Text>
-            <Text style={{ color: '#E0E7FF', fontSize: 12, marginTop: 2 }}>
-              Leave Applications, Emails & Interview Prep
-            </Text>
-          </View>
-          <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-        </Pressable>
-      
-      <View style={styles.searchBar}>
-        <Ionicons name="search-outline" size={20} color={styles.searchIcon.color} />
-        <TextInput
-          accessibilityLabel="Search jobs"
-          autoCapitalize="none"
-          onChangeText={setQuery}
-          onSubmitEditing={Keyboard.dismiss}
-          placeholder="Search title, department, organization"
-          placeholderTextColor={colors.muted}
-          returnKeyType="search"
-          style={styles.searchInput}
-          testID="job-search-input"
-          value={query}
-        />
-        {query ? (
-          <Pressable
-            accessibilityLabel="Clear search"
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => setQuery("")}
-          >
-            <Ionicons name="close-circle" size={19} color={styles.clearIcon.color} />
-          </Pressable>
-        ) : null}
-      </View>
-
-      <View style={styles.filterRow}>
-        {categories.map((item) => {
-          const selected = category === item;
-          return (
-            <Pressable
-              key={item}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              onPress={() => setCategory(item)}
-              style={({ pressed }) => [
-                styles.filterPill,
-                selected && styles.selectedPill,
-                pressed && styles.pressed,
-              ]}
-              testID={`filter-${item.toLowerCase()}`}
-            >
-              <Text
-                style={[
-                  styles.filterText,
-                  selected && styles.selectedFilterText,
-                ]}
-              >
-                {item}
-              </Text>
+        <View style={styles.searchBox}>
+          <Ionicons name="search-outline" size={18} color="#64748B" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search role, skills, company..."
+            placeholderTextColor="#94A3B8"
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
+          />
+          {query.length > 0 && (
+            <Pressable onPress={() => setQuery("")}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
             </Pressable>
-          );
-        })}
+          )}
+        </View>
+
+        <Pressable 
+          style={styles.circleIconBtn} 
+          onPress={() => setNotificationsVisible(true)}
+          accessibilityLabel="Notifications"
+        >
+          <Ionicons name="notifications-outline" size={22} color="#1E293B" />
+          {jobs.length > 0 && <View style={styles.notifBadge} />}
+        </Pressable>
       </View>
 
-      {error && jobs.length > 0 ? (
-        <View style={styles.errorBanner}>
-          <Ionicons name="alert-circle-outline" size={18} color={styles.errorIcon.color} />
-          <Text style={styles.errorText}>{error}</Text>
-          <Pressable onPress={() => void loadJobs(true)}>
-            <Text style={styles.retryInline}>Retry</Text>
-          </Pressable>
+      {/* 2. Naukri Style Profile / Toolkit Banner */}
+      <View style={styles.quickAccessCard}>
+        <View style={styles.quickCardLeft}>
+          <View style={styles.avatarMini}>
+            <Ionicons name="person" size={20} color="#2563EB" />
+            <View style={styles.verifiedCheck}>
+              <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+            </View>
+          </View>
+          <View style={styles.quickCardTextWrap}>
+            <Text style={styles.quickCardTitle}>Profile Strength (85%)</Text>
+            <Text style={styles.quickCardSubtitle}>Complete details to get verified calls</Text>
+          </View>
         </View>
-      ) : null}
 
-      <View style={styles.resultsHeader}>
-        <Text style={styles.sectionTitle}>
-          {query || category !== "All" ? "Matching roles" : "Latest opportunities"}
-        </Text>
-        <Text style={styles.resultCount}>
-          {filteredJobs.length} {filteredJobs.length === 1 ? "role" : "roles"}
-        </Text>
+        <Pressable 
+          style={styles.toolkitBtn}
+          onPress={() => router.push("/resources")}
+        >
+          <Text style={styles.toolkitBtnText}>Toolkit 📋</Text>
+        </Pressable>
+      </View>
+
+      {/* 3. Horizontal Filter Tabs with Live Job Counts */}
+      <View style={styles.filterSection}>
+        <View style={styles.filterSectionHeader}>
+          <Text style={styles.filterSectionTitle}>Recommended Jobs</Text>
+          <Text style={styles.resultsCount}>{filteredJobs.length} openings</Text>
+        </View>
+
+        <View style={styles.chipsContainer}>
+          {categories.map((item) => {
+            const isSelected = category === item;
+            const count = getCategoryCount(item);
+            return (
+              <Pressable
+                key={item}
+                onPress={() => setCategory(item)}
+                style={[styles.chip, isSelected && styles.activeChip]}
+              >
+                <Text style={[styles.chipText, isSelected && styles.activeChipText]}>
+                  {item} ({count})
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.screen}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
+    <View style={styles.container}>
+      {renderHeader()}
+
+      {loading && !refreshing ? (
+        <View style={styles.centerBox}>
+          <ActivityIndicator size="large" color="#2563EB" />
+          <Text style={styles.loadingText}>Fetching latest openings...</Text>
+        </View>
+      ) : (
         <FlatList
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: insets.bottom + 24, paddingTop: insets.top + 12 },
-          ]}
           data={filteredJobs}
-          keyExtractor={(job) => String(job.id)}
-          keyboardShouldPersistTaps="handled"
-          ListEmptyComponent={
-            loading ? (
-              <LoadingState styles={styles} />
-            ) : error && !jobs.length ? (
-              <ErrorState
-                error={error}
-                onRetry={() => void loadJobs()}
-                styles={styles}
-              />
-            ) : (
-              <EmptyState
-                hasFilters={Boolean(query || category !== "All")}
-                onReset={resetFilters}
-                styles={styles}
-              />
-            )
-          }
-          ListHeaderComponent={header}
-          refreshControl={
-            <RefreshControl
-              onRefresh={() => void loadJobs(true)}
-              refreshing={refreshing}
-              tintColor={colors.brand}
-              colors={[colors.brand]}
-            />
-          }
+          keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <JobCard job={item} onApply={openApplication} />
           )}
+          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          testID="jobs-list"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void loadJobs(true)}
+              colors={["#2563EB"]}
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.centerBox}>
+              <Ionicons name="briefcase-outline" size={48} color="#94A3B8" />
+              <Text style={styles.emptyTitle}>No matching jobs found</Text>
+              <Text style={styles.emptySubtitle}>
+                Try clearing your search query or selecting "All" categories.
+              </Text>
+              <Pressable
+                style={styles.resetButton}
+                onPress={() => {
+                  setQuery("");
+                  setCategory("All");
+                }}
+              >
+                <Text style={styles.resetButtonText}>Reset Filters</Text>
+              </Pressable>
+            </View>
+          }
         />
-      </KeyboardAvoidingView>
-      <NotificationModal
-        jobs={jobs.slice(0, 8)}
-        onClose={() => setNotificationsVisible(false)}
-        visible={notificationsVisible}
-      />
-    </View>
-  );
-}
+      )}
 
-function LoadingState({ styles }: { styles: ReturnType<typeof useStyles> }) {
-  return (
-    <View style={styles.state} testID="jobs-loading">
-      <ActivityIndicator size="large" color={styles.loading.color} />
-      <Text style={styles.stateTitle}>Finding your next opportunity...</Text>
-      <Text style={styles.stateBody}>Fetching the latest listings.</Text>
-    </View>
-  );
-}
-
-function ErrorState({
-  error,
-  onRetry,
-  styles,
-}: {
-  error: string;
-  onRetry: () => void;
-  styles: ReturnType<typeof useStyles>;
-}) {
-  return (
-    <View style={styles.state} testID="jobs-error">
-      <View style={styles.stateIcon}>
-        <Ionicons name="cloud-offline-outline" size={28} color={styles.stateIconGlyph.color} />
-      </View>
-      <Text style={styles.stateTitle}>We couldn’t load jobs</Text>
-      <Text style={styles.stateBody}>{error}</Text>
-      <Pressable
-        onPress={onRetry}
-        style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.retryText}>Try again</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-function EmptyState({
-  hasFilters,
-  onReset,
-  styles,
-}: {
-  hasFilters: boolean;
-  onReset: () => void;
-  styles: ReturnType<typeof useStyles>;
-}) {
-  return (
-    <View style={styles.state} testID="jobs-empty">
-      <View style={styles.stateIcon}>
-        <Ionicons name="compass-outline" size={28} color={styles.stateIconGlyph.color} />
-      </View>
-      <Text style={styles.stateTitle}>
-        {hasFilters ? "No matching jobs" : "No jobs posted yet"}
-      </Text>
-      <Text style={styles.stateBody}>
-        {hasFilters
-          ? "Try a different search or clear your filters to explore every opening."
-          : "New opportunities will appear here as soon as they are published."}
-      </Text>
-      {hasFilters ? (
-        <Pressable
-          onPress={onReset}
-          style={({ pressed }) => [
-            styles.retryButton,
-            pressed && styles.pressed,
-          ]}
+      {/* 4. Sticky Bottom Navigation Bar */}
+      <View style={[styles.bottomTabBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+        <Pressable 
+          style={styles.tabBtn} 
+          onPress={() => setCategory("All")}
         >
-          <Text style={styles.retryText}>Clear filters</Text>
+          <Ionicons name="home" size={22} color="#2563EB" />
+          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
         </Pressable>
-      ) : null}
+
+        <Pressable 
+          style={styles.tabBtn} 
+          onPress={() => setCategory("Private")}
+        >
+          <Ionicons name="briefcase-outline" size={22} color="#64748B" />
+          <Text style={styles.tabLabel}>Jobs</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.tabBtn} 
+          onPress={() => router.push("/resources")}
+        >
+          <Ionicons name="document-text-outline" size={22} color="#64748B" />
+          <Text style={styles.tabLabel}>Toolkit</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.tabBtn} 
+          onPress={() => setNotificationsVisible(true)}
+        >
+          <Ionicons name="person-outline" size={22} color="#64748B" />
+          <Text style={styles.tabLabel}>Profile</Text>
+        </Pressable>
+      </View>
+
+      <NotificationModal
+        visible={notificationsVisible}
+        onClose={() => setNotificationsVisible(false)}
+      />
     </View>
   );
 }
 
 const useStyles = makeStyles((colors) =>
   StyleSheet.create({
-    screen: { backgroundColor: colors.surface, flex: 1 },
-    keyboardView: { flex: 1 },
-    listContent: { paddingHorizontal: 20 },
-    header: {
-      alignItems: "center",
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-    brandLockup: { alignItems: "center", flexDirection: "row", gap: 11 },
-    brandMark: {
-      alignItems: "center",
-      backgroundColor: colors.brandPrimary,
-      borderRadius: 13,
-      height: 38,
-      justifyContent: "center",
-      width: 38,
-    },
-    eyebrow: {
-      color: colors.brand,
-      fontSize: 10,
-      fontWeight: "800",
-      letterSpacing: 1.3,
-      marginBottom: 2,
-    },
-    title: {
-      color: colors.onSurface,
-      fontSize: 18,
-      fontWeight: "800",
-      letterSpacing: -0.3,
-    },
-    notificationButton: {
-      alignItems: "center",
-      backgroundColor: colors.surfaceSecondary,
-      borderColor: colors.border,
-      borderRadius: 22,
-      borderWidth: 1,
-      height: 44,
-      justifyContent: "center",
-      position: "relative",
-      width: 44,
-    },
-    notificationIcon: { color: colors.onSurface },
-    notificationDot: {
-      backgroundColor: colors.brand,
-      borderColor: colors.surfaceSecondary,
-      borderRadius: 5,
-      borderWidth: 2,
-      height: 10,
-      position: "absolute",
-      right: 9,
-      top: 8,
-      width: 10,
-    },
-    introBlock: { gap: 8, marginBottom: 22, marginTop: 35 },
-    heading: {
-      color: colors.onSurface,
-      fontSize: 30,
-      fontWeight: "800",
-      letterSpacing: -1,
-      lineHeight: 36,
-      maxWidth: 350,
-    },
-    subtitle: {
-      color: colors.muted,
-      fontSize: 15,
-      lineHeight: 22,
-      maxWidth: 340,
-    },
-    searchBar: {
-      alignItems: "center",
-      backgroundColor: colors.surfaceSecondary,
-      borderColor: colors.border,
-      borderRadius: 15,
-      borderWidth: 1,
-      flexDirection: "row",
-      gap: 10,
-      minHeight: 54,
-      paddingHorizontal: 15,
-    },
-    searchIcon: { color: colors.brand },
-    searchInput: {
-      color: colors.onSurface,
+    container: {
       flex: 1,
-      fontSize: 14,
-      minHeight: 52,
+      backgroundColor: "#F8FAFC",
     },
-    clearIcon: { color: colors.muted },
-    filterRow: {
+    headerWrapper: {
+      backgroundColor: "#FFFFFF",
+      borderBottomWidth: 1,
+      borderBottomColor: "#E2E8F0",
+    },
+    topBar: {
       flexDirection: "row",
-      gap: 9,
-      marginBottom: 26,
-      marginTop: 15,
-    },
-    filterPill: {
       alignItems: "center",
-      backgroundColor: colors.surfaceTertiary,
-      borderRadius: 999,
-      minHeight: 40,
-      justifyContent: "center",
-      paddingHorizontal: 18,
+      paddingHorizontal: 16,
+      paddingBottom: 10,
+      gap: 12,
     },
-    selectedPill: { backgroundColor: colors.brandPrimary },
-    filterText: {
-      color: colors.onSurfaceTertiary,
+    circleIconBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "#F1F5F9",
+      justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
+    },
+    notifBadge: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: "#EF4444",
+    },
+    searchBox: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#F1F5F9",
+      borderRadius: 22,
+      paddingHorizontal: 14,
+      height: 42,
+      gap: 8,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 13,
+      color: "#0F172A",
+    },
+    quickAccessCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: "#EFF6FF",
+      marginHorizontal: 16,
+      marginBottom: 12,
+      padding: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#DBEAFE",
+    },
+    quickCardLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      flex: 1,
+    },
+    avatarMini: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "#DBEAFE",
+      justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
+    },
+    verifiedCheck: {
+      position: "absolute",
+      bottom: -1,
+      right: -1,
+      backgroundColor: "#16A34A",
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1.5,
+      borderColor: "#FFFFFF",
+    },
+    quickCardTextWrap: {
+      flex: 1,
+    },
+    quickCardTitle: {
       fontSize: 13,
       fontWeight: "700",
+      color: "#1E3A8A",
     },
-    selectedFilterText: { color: colors.onBrandPrimary },
-    errorBanner: {
-      alignItems: "center",
-      backgroundColor: colors.brandTertiary,
-      borderRadius: 12,
-      flexDirection: "row",
-      gap: 8,
-      marginBottom: 19,
-      padding: 12,
+    quickCardSubtitle: {
+      fontSize: 11,
+      color: "#3B82F6",
+      marginTop: 1,
     },
-    errorIcon: { color: colors.brand },
-    errorText: {
-      color: colors.onBrandTertiary,
-      flex: 1,
-      fontSize: 12,
-      lineHeight: 17,
+    toolkitBtn: {
+      backgroundColor: "#2563EB",
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 10,
     },
-    retryInline: { color: colors.brand, fontSize: 12, fontWeight: "800" },
-    resultsHeader: {
-      alignItems: "baseline",
+    toolkitBtnText: {
+      color: "#FFFFFF",
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    filterSection: {
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+    },
+    filterSectionHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: 13,
+      alignItems: "center",
+      marginBottom: 10,
     },
-    sectionTitle: {
-      color: colors.onSurface,
-      fontSize: 20,
+    filterSectionTitle: {
+      fontSize: 16,
       fontWeight: "800",
-      letterSpacing: -0.4,
+      color: "#0F172A",
     },
-    resultCount: { color: colors.muted, fontSize: 13, fontWeight: "600" },
-    state: {
+    resultsCount: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#64748B",
+    },
+    chipsContainer: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 18,
+      backgroundColor: "#F1F5F9",
+      borderWidth: 1,
+      borderColor: "#E2E8F0",
+    },
+    activeChip: {
+      backgroundColor: "#2563EB",
+      borderColor: "#2563EB",
+    },
+    chipText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#475569",
+    },
+    activeChipText: {
+      color: "#FFFFFF",
+    },
+    listContent: {
+      paddingTop: 14,
+      paddingBottom: 20,
+    },
+    centerBox: {
+      padding: 40,
       alignItems: "center",
-      flex: 1,
       justifyContent: "center",
-      minHeight: 330,
-      paddingHorizontal: 28,
     },
-    loading: { color: colors.brand },
-    stateIcon: {
-      alignItems: "center",
-      backgroundColor: colors.brandTertiary,
-      borderRadius: 36,
-      height: 72,
-      justifyContent: "center",
-      marginBottom: 18,
-      width: 72,
+    loadingText: {
+      marginTop: 12,
+      fontSize: 13,
+      color: "#64748B",
     },
-    stateIconGlyph: { color: colors.brand },
-    stateTitle: {
-      color: colors.onSurface,
-      fontSize: 20,
+    emptyTitle: {
+      fontSize: 16,
       fontWeight: "700",
-      marginBottom: 8,
-      textAlign: "center",
+      color: "#1E293B",
+      marginTop: 12,
     },
-    stateBody: {
-      color: colors.muted,
-      fontSize: 14,
-      lineHeight: 21,
-      maxWidth: 300,
+    emptySubtitle: {
+      fontSize: 13,
+      color: "#64748B",
       textAlign: "center",
+      marginTop: 6,
+      lineHeight: 18,
     },
-    retryButton: {
+    resetButton: {
+      marginTop: 16,
+      backgroundColor: "#2563EB",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 10,
+    },
+    resetButtonText: {
+      color: "#FFFFFF",
+      fontSize: 13,
+      fontWeight: "600",
+    },
+    bottomTabBar: {
+      flexDirection: "row",
+      justifyContent: "space-around",
       alignItems: "center",
-      backgroundColor: colors.brandPrimary,
-      borderRadius: 12,
-      marginTop: 22,
-      minHeight: 46,
-      justifyContent: "center",
-      paddingHorizontal: 20,
+      backgroundColor: "#FFFFFF",
+      borderTopWidth: 1,
+      borderTopColor: "#E2E8F0",
+      paddingTop: 8,
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
     },
-    retryText: { color: colors.onBrandPrimary, fontSize: 14, fontWeight: "700" },
-    pressed: { opacity: 0.72, transform: [{ scale: 0.98 }] },
+    tabBtn: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    tabLabel: {
+      fontSize: 11,
+      fontWeight: "500",
+      color: "#64748B",
+      marginTop: 3,
+    },
+    tabLabelActive: {
+      color: "#2563EB",
+      fontWeight: "700",
+    },
   })
 );
-  
+                  

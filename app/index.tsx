@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+.import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -21,8 +21,8 @@ import { Job, JobCard } from "../src/components/job-card";
 import NotificationModal from "../src/components/notification-modal";
 import { supabase } from "../src/lib/supabase";
 
-type Category = "All" | "Government" | "Private";
-const categories: Category[] = ["All", "Government", "Private"];
+type Category = "All" | "Fresher" | "Internship" | "Remote";
+const categories: Category[] = ["All", "Fresher", "Internship", "Remote"];
 
 export default function Index() {
   const router = useRouter();
@@ -121,7 +121,7 @@ export default function Index() {
           Find work that moves{"\n"}you forward.
         </Text>
         <Text style={styles.heroSubtitle}>
-          Browse verified openings across government{"\n"}and private organizations.
+          Browse entry-level jobs, internships{'\n'}and early career opportunities.
         </Text>
       </View>
 
@@ -131,10 +131,9 @@ export default function Index() {
         onPress={() => router.push("/resources")}
       >
         <View style={{ flex: 1 }}>
-          <Text style={styles.bannerTitle}>Career Toolkit & Templates 📋</Text>
           <Text style={styles.bannerSubtitle}>
-            Leave Applications, Emails & Interview Prep
-          </Text>
+           Leave Applications, Cover Letters, Resignation & Cold Emails
+        </Text>
         </View>
         <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
       </Pressable>

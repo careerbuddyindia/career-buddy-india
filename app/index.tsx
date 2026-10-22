@@ -329,7 +329,7 @@ export default function Index() {
         />
       </View>
     </SafeAreaView>
-  );y
+  );
 }
 
 const styles = StyleSheet.create({

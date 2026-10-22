@@ -11,12 +11,8 @@ import {
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
-import { createClient } from '@supabase/supabase-js';
-
-// Supabase credentials using environment variables
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Line 14-19 ko hata kar yeh likhein:
+import { supabase } from '../src/lib/supabase';
 
 interface ResourceItem {
   id: number;
@@ -65,11 +61,23 @@ export default function ResourcesScreen() {
     await Clipboard.setStringAsync(text);
     Alert.alert('Copied!', `"${title}" has been copied to your clipboard.`);
   };
-
+  
+  const shareTemplate = async (text: string, title: string) => {
+  try {
+    await Share.share({
+      message: `${title}\n\n${text}\n\n-- Shared via Career Buddy India`,
+    });
+  } catch (error: any) {
+    console.log(error.message);
+  }
+};
+  
   const filteredResources = selectedCategory === 'All'
-    ? resources
-    : resources.filter((item) => item.category === selectedCategory);
-
+  ? resources
+  : resources.filter((item) => 
+      item.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
+    );
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Header */}

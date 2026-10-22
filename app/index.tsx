@@ -315,8 +315,8 @@ export default function Index() {
           </Pressable>
 
           <Pressable 
-            style={styles.tabBtn} 
-            onPress={() => setNotificationsVisible(true)}
+             style={styles.tabBtn} 
+             onPress={() => router.push("/login")}
           >
             <Ionicons name="person-outline" size={22} color="#64748B" />
             <Text style={styles.tabLabel}>Profile</Text>
@@ -329,7 +329,7 @@ export default function Index() {
         />
       </View>
     </SafeAreaView>
-  );
+  );y
 }
 
 const styles = StyleSheet.create({

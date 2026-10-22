@@ -1,6 +1,6 @@
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { makeStyles } from "@/src/theme";
 
 export type Job = {
   id: string | number;
@@ -31,16 +31,12 @@ const formatDate = (value: string | null) => {
 };
 
 export function JobCard({ job, onApply }: JobCardProps) {
-  const styles = useStyles();
   const isGovernment = job.category?.toLowerCase() === "government";
   const canApply = Boolean(job.apply_link);
-
-  // Logo ke liye company name ka pehla letter
   const companyInitial = (job.organization || "J").charAt(0).toUpperCase();
 
   return (
     <View style={styles.card} testID={`job-card-${job.id}`}>
-      {/* Top Section: Logo + Title + Org */}
       <View style={styles.cardHeader}>
         <View style={styles.logoBox}>
           <Text style={styles.logoText}>{companyInitial}</Text>
@@ -62,7 +58,6 @@ export function JobCard({ job, onApply }: JobCardProps) {
         </View>
       </View>
 
-      {/* Meta Information: Location & Qualification/Salary */}
       <View style={styles.metaContainer}>
         <View style={styles.metaRow}>
           <Ionicons name="location-outline" size={16} color="#64748B" />
@@ -79,7 +74,6 @@ export function JobCard({ job, onApply }: JobCardProps) {
         </View>
       </View>
 
-      {/* Badges / Highlights */}
       <View style={styles.badgesRow}>
         <View style={styles.urgentBadge}>
           <Ionicons name="flash" size={12} color="#D97706" />
@@ -102,10 +96,8 @@ export function JobCard({ job, onApply }: JobCardProps) {
 
       <View style={styles.divider} />
 
-      {/* Naukri-style Action Button */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Apply online for ${job.title || "this job"}`}
         disabled={!canApply}
         onPress={() => job.apply_link && onApply(job.apply_link)}
         style={({ pressed }) => [
@@ -122,183 +114,175 @@ export function JobCard({ job, onApply }: JobCardProps) {
   );
 }
 
-const useStyles = makeStyles((colors) =>
-  StyleSheet.create({
-    card: {
-      backgroundColor: "#FFFFFF",
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: "#E2E8F0",
-      marginHorizontal: 16,
-      marginBottom: 14,
-      padding: 16,
-      shadowColor: "#0F172A",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 6,
-      elevation: 2,
-    },
-    cardHeader: {
-      flexDirection: "row",
-      alignItems: "flex-start",
-      gap: 12,
-    },
-    logoBox: {
-      width: 44,
-      height: 44,
-      borderRadius: 10,
-      backgroundColor: "#EEF2FF",
-      borderWidth: 1,
-      borderColor: "#E0E7FF",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    logoText: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: "#4338CA",
-    },
-    titleContainer: {
-      flex: 1,
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: "#1E293B",
-      lineHeight: 22,
-    },
-    companyRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      marginTop: 4,
-    },
-    organization: {
-      fontSize: 14,
-      fontWeight: "500",
-      color: "#475569",
-      maxWidth: "70%",
-    },
-    ratingBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 2,
-      backgroundColor: "#F8FAFC",
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: "#E2E8F0",
-    },
-    starText: {
-      fontSize: 11,
-      color: "#F59E0B",
-    },
-    ratingNumber: {
-      fontSize: 11,
-      fontWeight: "600",
-      color: "#475569",
-    },
-    metaContainer: {
-      marginTop: 12,
-      gap: 6,
-    },
-    metaRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-    },
-    metaText: {
-      fontSize: 13,
-      color: "#475569",
-    },
-    badgesRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      alignItems: "center",
-      gap: 8,
-      marginTop: 12,
-    },
-    urgentBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      backgroundColor: "#FEF3C7",
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-    },
-    urgentText: {
-      fontSize: 11,
-      fontWeight: "600",
-      color: "#92400E",
-    },
-    badge: {
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-    },
-    govtBadge: {
-      backgroundColor: "#DCFCE7",
-    },
-    govtBadgeText: {
-      color: "#166534",
-      fontSize: 11,
-      fontWeight: "600",
-      textTransform: "uppercase",
-    },
-    pvtBadge: {
-      backgroundColor: "#F1F5F9",
-    },
-    pvtBadgeText: {
-      color: "#475569",
-      fontSize: 11,
-      fontWeight: "600",
-      textTransform: "uppercase",
-    },
-    dateBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      backgroundColor: "#F8FAFC",
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-    },
-    dateText: {
-      fontSize: 11,
-      color: "#64748B",
-    },
-    divider: {
-      height: 1,
-      backgroundColor: "#F1F5F9",
-      marginVertical: 12,
-    },
-    applyButton: {
-      backgroundColor: "#EEF2FF",
-      borderRadius: 24,
-      paddingVertical: 10,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: "#C7D2FE",
-    },
-    applyButtonText: {
-      color: "#3730A3",
-      fontSize: 14,
-      fontWeight: "700",
-    },
-    disabledButton: {
-      backgroundColor: "#F1F5F9",
-      borderColor: "#E2E8F0",
-    },
-    disabledButtonText: {
-      color: "#94A3B8",
-    },
-    pressed: {
-      opacity: 0.8,
-      transform: [{ scale: 0.99 }],
-    },
-  })
-);
-    
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    marginHorizontal: 16,
+    marginBottom: 14,
+    padding: 16,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  logoBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: "#EEF2FF",
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#4338CA",
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1E293B",
+    lineHeight: 22,
+  },
+  companyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+  organization: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#475569",
+    maxWidth: "70%",
+  },
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  starText: {
+    fontSize: 11,
+    color: "#F59E0B",
+  },
+  ratingNumber: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#475569",
+  },
+  metaContainer: {
+    marginTop: 12,
+    gap: 6,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  metaText: {
+    fontSize: 13,
+    color: "#475569",
+  },
+  badgesRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 12,
+  },
+  urgentBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  urgentText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#92400E",
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  govtBadge: {
+    backgroundColor: "#DCFCE7",
+  },
+  govtBadgeText: {
+    color: "#166534",
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  pvtBadge: {
+    backgroundColor: "#F1F5F9",
+  },
+  pvtBadgeText: {
+    color: "#475569",
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  dateBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  dateText: {
+    fontSize: 11,
+    color: "#64748B",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginVertical: 12,
+  },
+  applyButton: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 24,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+  },
+  applyButtonText: {
+    color: "#3730A3",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  disabledButton: {
+    backgroundColor: "#F1F5F9",
+    borderColor: "#E2E8F0",
+  },
+  disabledButtonText: {
+    color: "#94A3B8",
+  },
+  pressed: {
+    opacity: 0.8,
+  },
+});

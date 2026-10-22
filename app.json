@@ -33,12 +33,14 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "expo-image",
       "expo-secure-store",
       "expo-web-browser",
       "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "sdkVersion": "57.0.0"
   }
 }

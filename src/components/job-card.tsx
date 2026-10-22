@@ -31,12 +31,12 @@ const formatDate = (value: string | null) => {
 };
 
 export function JobCard({ job, onApply }: JobCardProps) {
-  const isGovernment = job.category?.toLowerCase() === "government";
+  const isGovernment = (job.category || "").toLowerCase() === "government";
   const canApply = Boolean(job.apply_link);
   const companyInitial = (job.organization || "J").charAt(0).toUpperCase();
 
   return (
-    <View style={styles.card} testID={`job-card-${job.id}`}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.logoBox}>
           <Text style={styles.logoText}>{companyInitial}</Text>
@@ -48,7 +48,7 @@ export function JobCard({ job, onApply }: JobCardProps) {
           </Text>
           <View style={styles.companyRow}>
             <Text style={styles.organization} numberOfLines={1}>
-              {job.organization || "Confidential Organization"}
+              {job.organization || "Organization not listed"}
             </Text>
             <View style={styles.ratingBadge}>
               <Text style={styles.starText}>★</Text>
@@ -60,14 +60,14 @@ export function JobCard({ job, onApply }: JobCardProps) {
 
       <View style={styles.metaContainer}>
         <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={16} color="#64748B" />
+          <Ionicons name="location-outline" size={15} color="#64748B" />
           <Text style={styles.metaText} numberOfLines={1}>
-            {job.location || "Remote / Pan India"}
+            {job.location || "Location not specified"}
           </Text>
         </View>
 
         <View style={styles.metaRow}>
-          <Ionicons name="school-outline" size={16} color="#64748B" />
+          <Ionicons name="school-outline" size={15} color="#64748B" />
           <Text style={styles.metaText} numberOfLines={1}>
             {job.qualification || "Any Graduate"}
           </Text>
@@ -76,19 +76,19 @@ export function JobCard({ job, onApply }: JobCardProps) {
 
       <View style={styles.badgesRow}>
         <View style={styles.urgentBadge}>
-          <Ionicons name="flash" size={12} color="#D97706" />
+          <Ionicons name="flash" size={11} color="#B45309" />
           <Text style={styles.urgentText}>Urgent Hiring</Text>
         </View>
 
         <View style={[styles.badge, isGovernment ? styles.govtBadge : styles.pvtBadge]}>
           <Text style={[styles.badgeText, isGovernment ? styles.govtBadgeText : styles.pvtBadgeText]}>
-            {job.category || "General"}
+            {job.category || "Private"}
           </Text>
         </View>
 
         {job.last_date ? (
           <View style={styles.dateBadge}>
-            <Ionicons name="time-outline" size={12} color="#64748B" />
+            <Ionicons name="calendar-outline" size={11} color="#64748B" />
             <Text style={styles.dateText}>{formatDate(job.last_date)}</Text>
           </View>
         ) : null}
@@ -97,7 +97,6 @@ export function JobCard({ job, onApply }: JobCardProps) {
       <View style={styles.divider} />
 
       <Pressable
-        accessibilityRole="button"
         disabled={!canApply}
         onPress={() => job.apply_link && onApply(job.apply_link)}
         style={({ pressed }) => [
@@ -128,7 +127,6 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 12,
   },
   logoBox: {
     width: 44,
@@ -139,11 +137,12 @@ const styles = StyleSheet.create({
     borderColor: "#E0E7FF",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 12,
   },
   logoText: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#4338CA",
+    color: "#3730A3",
   },
   titleContainer: {
     flex: 1,
@@ -151,13 +150,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1E293B",
+    color: "#0F172A",
     lineHeight: 22,
   },
   companyRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
     marginTop: 4,
   },
   organization: {
@@ -165,11 +163,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#475569",
     maxWidth: "70%",
+    marginRight: 8,
   },
   ratingBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 2,
     backgroundColor: "#F8FAFC",
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -180,6 +178,7 @@ const styles = StyleSheet.create({
   starText: {
     fontSize: 11,
     color: "#F59E0B",
+    marginRight: 2,
   },
   ratingNumber: {
     fontSize: 11,
@@ -188,42 +187,45 @@ const styles = StyleSheet.create({
   },
   metaContainer: {
     marginTop: 12,
-    gap: 6,
   },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    marginTop: 4,
   },
   metaText: {
     fontSize: 13,
     color: "#475569",
+    marginLeft: 6,
   },
   badgesRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: 8,
     marginTop: 12,
   },
   urgentBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
     backgroundColor: "#FEF3C7",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    marginRight: 8,
+    marginBottom: 4,
   },
   urgentText: {
     fontSize: 11,
     fontWeight: "600",
     color: "#92400E",
+    marginLeft: 3,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    marginRight: 8,
+    marginBottom: 4,
   },
   govtBadge: {
     backgroundColor: "#DCFCE7",
@@ -246,15 +248,16 @@ const styles = StyleSheet.create({
   dateBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
     backgroundColor: "#F8FAFC",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    marginBottom: 4,
   },
   dateText: {
     fontSize: 11,
     color: "#64748B",
+    marginLeft: 3,
   },
   divider: {
     height: 1,

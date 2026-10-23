@@ -227,9 +227,10 @@ export default function Index() {
       )}
 
       <NotificationModal
-        visible={notificationsVisible}
-        onClose={() => setNotificationsVisible(false)}
-      />
+       visible={notificationsVisible}
+       jobs={jobs}
+       onClose={() => setNotificationsVisible(false)}
+     />
     </SafeAreaView>
   );
 }

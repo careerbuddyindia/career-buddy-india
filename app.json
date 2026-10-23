@@ -17,7 +17,7 @@
       "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.jpg",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {
@@ -35,6 +35,10 @@
     "experiments": {
       "typedRoutes": true
     },
-    "sdkVersion": "57.0.0"
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_PROJECT_ID_HERE"
+      }
+    }
   }
 }

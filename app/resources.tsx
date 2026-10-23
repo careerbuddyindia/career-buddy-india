@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView, 
-  TouchableOpacity, 
-  ActivityIndicator, 
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
   SafeAreaView,
-  Alert
+  Alert,
+  Share
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { useRouter } from 'expo-router';
+import { supabase } from '../src/lib/supabase';
+
 import { useRouter } from 'expo-router';
 // Line 14-19 ko hata kar yeh likhein:
 import { supabase } from '../src/lib/supabase';

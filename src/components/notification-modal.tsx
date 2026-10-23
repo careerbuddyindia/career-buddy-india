@@ -6,11 +6,11 @@ import { makeStyles } from "@/src/theme";
 
 type NotificationModalProps = {
   visible: boolean;
-  jobs: Job[];
+  jobs?: Job[];
   onClose: () => void;
 };
 
-export function NotificationModal({ visible, jobs, onClose }: NotificationModalProps) {
+export function NotificationModal({ visible, jobs = [], onClose }: NotificationModalProps) {
   const insets = useSafeAreaInsets();
   const styles = useStyles();
 

@@ -26,13 +26,30 @@ jobs:
       - name: Prebuild Android
         run: npx expo prebuild --platform android --clean
 
-      - name: Build Standalone Debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug -Dexpo.dev=false
+      - name: Create Bundle Directory
+        run: mkdir -p android/app/src/main/assets
 
-      - name: Upload APK
+      - name: Generate Offline JS Bundle
+        run: |
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output android/app/src/main/assets/index.android.bundle \
+            --assets-dest android/app/src/main/res/ || npx expo export --platform android
+
+      - name: Configure Debug Keystore for Release
+        working-directory: android/app
+        run: |
+          sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' build.gradle || true
+
+      - name: Build Standalone APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Upload Standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-standalone-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: career-buddy-apk
+          path: android/app/build/outputs/apk/release/*.apk
           

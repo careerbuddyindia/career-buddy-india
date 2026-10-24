@@ -24,16 +24,11 @@ jobs:
         run: npm install
 
       - name: Prebuild Android
-        run: npx expo prebuild --platform android
+        run: npx expo prebuild --platform android --clean
 
-      - name: Bundle Assets
-        run: |
-          mkdir -p android/app/src/main/assets
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || npx react-native bundle --platform android --dev false --entry-file node_modules/expo/AppEntry.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
-
-      - name: Build Debug APK
+      - name: Build Standalone Debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug -Dexpo.dev=false
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

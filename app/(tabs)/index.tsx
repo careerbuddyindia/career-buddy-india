@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,9 +9,12 @@ import {
   Linking,
   Alert,
   Share,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../src/lib/supabase';
 
 interface JobItem {
   id: string;
@@ -22,102 +25,71 @@ interface JobItem {
   type: string;
   category: string;
   experience: string;
-  contactEmail: string;
+  contact_email: string;
   whatsapp: string;
 }
-
-const JOBS_DATA: JobItem[] = [
-  {
-    id: '1',
-    role: 'Back Office & Data Entry Assistant',
-    company: 'Apex Tech Solutions',
-    location: 'Noida / Work From Home',
-    salary: '₹16,000 - ₹22,000 / month',
-    type: 'Full-time',
-    category: 'WFH',
-    experience: 'Fresher / 0-1 Yr',
-    contactEmail: 'hr@apextech.sample.in',
-    whatsapp: '919876543210',
-  },
-  {
-    id: '2',
-    role: 'Customer Care Representative (Voice)',
-    company: 'Global BPO Services',
-    location: 'Gurugram / Jaipur',
-    salary: '₹18,000 - ₹25,000 / month',
-    type: 'Full-time',
-    category: '12th Pass',
-    experience: '12th Pass / Graduate',
-    contactEmail: 'careers@globalbpo.sample.in',
-    whatsapp: '919876543211',
-  },
-  {
-    id: '3',
-    role: 'Junior Field Sales Executive',
-    company: 'FastTrack Logistics',
-    location: 'Delhi NCR / Lucknow',
-    salary: '₹15,000 + Daily Incentives',
-    type: 'Full-time',
-    category: 'Sales',
-    experience: 'Freshers Welcome',
-    contactEmail: 'jobs@fasttrack.sample.in',
-    whatsapp: '919876543212',
-  },
-  {
-    id: '4',
-    role: 'Telecalling & Lead Generation Officer',
-    company: 'Smart EduTech India',
-    location: 'Remote (Pan India)',
-    salary: '₹14,000 - ₹20,000 / month',
-    type: 'Full-time',
-    category: 'WFH',
-    experience: 'Fresher Eligible',
-    contactEmail: 'hire@smartedu.sample.in',
-    whatsapp: '919876543213',
-  },
-  {
-    id: '5',
-    role: 'Junior React Native / Frontend Trainee',
-    company: 'NextWave Softwares',
-    location: 'Bengaluru / Pune',
-    salary: '₹20,000 - ₹30,000 / month',
-    type: 'Full-time',
-    category: 'Graduate',
-    experience: 'BCA / B.Tech / Any Graduate',
-    contactEmail: 'dev-jobs@nextwave.sample.in',
-    whatsapp: '919876543214',
-  },
-];
 
 const CATEGORIES = ['All', 'WFH', '12th Pass', 'Sales', 'Graduate'];
 
 export default function JobsScreen() {
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredJobs = JOBS_DATA.filter((job) => {
+  const fetchJobs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) {
+        Alert.alert('Notice', 'Unable to fetch real-time jobs. Showing default jobs.');
+      } else if (data && data.length > 0) {
+        setJobs(data as JobItem[]);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchJobs();
+  };
+
+  const filteredJobs = jobs.filter((job) => {
     const matchesCategory =
       selectedCategory === 'All' || job.category === selectedCategory;
     const matchesSearch =
-      job.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase());
+      (job.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (job.location || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (job.company || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   const handleApplyEmail = (job: JobItem) => {
     const subject = encodeURIComponent(`Application for ${job.role} - Career Buddy India`);
     const body = encodeURIComponent(
-      `Respected HR Team,\n\nI am writing to express my interest in the ${job.role} position at ${job.company}.\n\nPlease find my resume attached.\n\nThank you,\nCandidate`
+      `Respected HR Team,\n\nI am writing to express my interest in the ${job.role} opening at ${job.company}.\n\nPlease find my resume attached.\n\nThank you,\nCandidate`
     );
-    Linking.openURL(`mailto:${job.contactEmail}?subject=${subject}&body=${body}`).catch(() => {
-      Alert.alert('Email App Missing', `Please email your CV directly to: ${job.contactEmail}`);
+    Linking.openURL(`mailto:${job.contact_email}?subject=${subject}&body=${body}`).catch(() => {
+      Alert.alert('Email App Missing', `Please email your CV directly to: ${job.contact_email}`);
     });
   };
 
   const handleApplyWhatsApp = (job: JobItem) => {
     const msg = encodeURIComponent(
-      `Hello HR, I saw the hiring for "${job.role}" on Career Buddy India. I am interested and want to apply.`
+      `Hello HR, I saw the opening for "${job.role}" on Career Buddy India. I am interested and want to apply.`
     );
     Linking.openURL(`whatsapp://send?phone=${job.whatsapp}&text=${msg}`).catch(() => {
       Alert.alert('Notice', 'WhatsApp is not installed on this device.');
@@ -127,7 +99,7 @@ export default function JobsScreen() {
   const handleShareJob = async (job: JobItem) => {
     try {
       await Share.share({
-        message: `Opportunity: ${job.role} at ${job.company} (${job.location}). Salary: ${job.salary}. Contact: ${job.contactEmail}. Shared via Career Buddy India!`,
+        message: `Opportunity: ${job.role} at ${job.company} (${job.location}). Salary: ${job.salary}. Contact: ${job.contact_email}. Shared via Career Buddy India!`,
       });
     } catch {}
   };
@@ -187,65 +159,80 @@ export default function JobsScreen() {
         />
       </View>
 
-      <FlatList
-        data={filteredJobs}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.roleText}>{item.role}</Text>
-                <Text style={styles.companyText}>{item.company}</Text>
-              </View>
-              <TouchableOpacity onPress={() => handleShareJob(item)}>
-                <Ionicons name="share-social-outline" size={22} color="#64748B" />
-              </TouchableOpacity>
+      {loading ? (
+        <View style={styles.centerBox}>
+          <ActivityIndicator size="large" color="#2563EB" />
+          <Text style={styles.loadingText}>Fetching latest jobs...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredJobs}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={
+            <View style={styles.centerBox}>
+              <Text style={styles.emptyText}>No jobs found in this category.</Text>
             </View>
-
-            <View style={styles.metaRow}>
-              <View style={styles.metaItem}>
-                <Ionicons name="location-outline" size={14} color="#64748B" />
-                <Text style={styles.metaText}>{item.location}</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.roleText}>{item.role}</Text>
+                  <Text style={styles.companyText}>{item.company}</Text>
+                </View>
+                <TouchableOpacity onPress={() => handleShareJob(item)}>
+                  <Ionicons name="share-social-outline" size={22} color="#64748B" />
+                </TouchableOpacity>
               </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="cash-outline" size={14} color="#059669" />
-                <Text style={[styles.metaText, { color: '#059669', fontWeight: 'bold' }]}>
-                  {item.salary}
-                </Text>
+
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <Ionicons name="location-outline" size={14} color="#64748B" />
+                  <Text style={styles.metaText}>{item.location}</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Ionicons name="cash-outline" size={14} color="#059669" />
+                  <Text style={[styles.metaText, { color: '#059669', fontWeight: 'bold' }]}>
+                    {item.salary}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tagRow}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{item.experience || 'Fresher'}</Text>
+                </View>
+                <View style={[styles.badge, { backgroundColor: '#EFF6FF' }]}>
+                  <Text style={[styles.badgeText, { color: '#2563EB' }]}>{item.type || 'Full-time'}</Text>
+                </View>
+              </View>
+
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.emailBtn]}
+                  onPress={() => handleApplyEmail(item)}
+                >
+                  <Ionicons name="mail" size={16} color="#FFFFFF" />
+                  <Text style={styles.actionBtnText}>Send CV (Email)</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.whatsappBtn]}
+                  onPress={() => handleApplyWhatsApp(item)}
+                >
+                  <Ionicons name="logo-whatsapp" size={16} color="#FFFFFF" />
+                  <Text style={styles.actionBtnText}>WhatsApp HR</Text>
+                </TouchableOpacity>
               </View>
             </View>
-
-            <View style={styles.tagRow}>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{item.experience}</Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: '#EFF6FF' }]}>
-                <Text style={[styles.badgeText, { color: '#2563EB' }]}>{item.type}</Text>
-              </View>
-            </View>
-
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.emailBtn]}
-                onPress={() => handleApplyEmail(item)}
-              >
-                <Ionicons name="mail" size={16} color="#FFFFFF" />
-                <Text style={styles.actionBtnText}>Send CV (Email)</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.whatsappBtn]}
-                onPress={() => handleApplyWhatsApp(item)}
-              >
-                <Ionicons name="logo-whatsapp" size={16} color="#FFFFFF" />
-                <Text style={styles.actionBtnText}>WhatsApp HR</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -300,6 +287,9 @@ const styles = StyleSheet.create({
   categoryText: { fontSize: 13, color: '#64748B', fontWeight: '600' },
   categoryTextActive: { color: '#FFFFFF' },
   listContent: { paddingHorizontal: 16, paddingBottom: 20 },
+  centerBox: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 },
+  loadingText: { marginTop: 10, fontSize: 13, color: '#64748B' },
+  emptyText: { fontSize: 14, color: '#94A3B8' },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
@@ -336,4 +326,3 @@ const styles = StyleSheet.create({
   whatsappBtn: { backgroundColor: '#16A34A' },
   actionBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
 });
-    

@@ -4,30 +4,14 @@
     "slug": "career-buddy-india",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1E293B"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
       "package": "com.careerbuddy.india",
       "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1E293B"
-      },
       "permissions": [
         "android.permission.INTERNET"
       ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"

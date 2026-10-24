@@ -1,44 +1,37 @@
 {
   "expo": {
     "name": "Career Buddy India",
-    "slug": "careerbuddyindiaofficial",
-    "owner": "careerbuddyindiaofficials-team",
-    "version": "1.0.1",
+    "slug": "career-buddy-india",
+    "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.jpg",
-    "scheme": "careerbuddyindia",
-    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E293B"
+    },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.careerbuddyindia.app"
+      "supportsTablet": true
     },
     "android": {
-      "package": "com.careerbuddyindia.app",
-      "versionCode": 4,
+      "package": "com.careerbuddy.india",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.jpg",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E293B"
+      },
+      "permissions": [
+        "android.permission.INTERNET"
+      ]
     },
     "web": {
-      "bundler": "metro",
-      "output": "single"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-image",
-      "expo-secure-store",
-      "expo-web-browser",
-      "expo-status-bar"
+      "expo-router"
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "a920c535-b954-4892-b29f-051ec189aeb3"
-      }
-    }
+    "scheme": "careerbuddy"
   }
 }

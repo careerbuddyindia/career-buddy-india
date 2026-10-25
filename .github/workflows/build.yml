@@ -38,37 +38,42 @@ jobs:
             --bundle-output android/app/src/main/assets/index.android.bundle \
             --assets-dest android/app/src/main/res/ || npx expo export --platform android
 
-      - name: Generate Release Keystore
-        working-directory: android/app
+      - name: Generate Keystore
         run: |
           keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore \
-            -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "MySecurePassword123" -keypass "MySecurePassword123" \
-            -dname "CN=Career Buddy, OU=App, O=Company, L=City, S=State, C=IN"
+            -alias careerbuddy -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android123 -keypass android123 \
+            -dname "CN=Career Buddy, OU=Mobile, O=CareerBuddy, L=Delhi, ST=Delhi, C=IN"
 
-      - name: Configure Release Signing in Gradle
+      - name: Force Release Signing Configuration in Gradle
         working-directory: android/app
         run: |
-          cat << 'EOF' > update_signing.py
+          cp ../../release.keystore ./release.keystore
+          cat << 'EOF' > patch_gradle.py
           with open("build.gradle", "r") as f:
-              content = f.read()
+              lines = f.readlines()
 
-          release_signing = """
+          new_lines = []
+          for line in lines:
+              if "signingConfigs {" in line:
+                  new_lines.append(line)
+                  new_lines.append("""
                   release {
                       storeFile file('release.keystore')
-                      storePassword 'MySecurePassword123'
-                      keyAlias 'my-key-alias'
-                      keyPassword 'MySecurePassword123'
+                      storePassword 'android123'
+                      keyAlias 'careerbuddy'
+                      keyPassword 'android123'
                   }
-          """
-          
-          if "signingConfigs {" in content:
-              content = content.replace("signingConfigs {", "signingConfigs {" + release_signing, 1)
+          """)
+              elif "signingConfig signingConfigs.debug" in line:
+                  new_lines.append("            signingConfig signingConfigs.release\n")
+              else:
+                  new_lines.append(line)
 
           with open("build.gradle", "w") as f:
-              f.write(content)
+              f.writelines(new_lines)
           EOF
-          python3 update_signing.py
+          python3 patch_gradle.py
 
       - name: Build Both AAB & APK
         working-directory: android

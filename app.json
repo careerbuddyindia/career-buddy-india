@@ -7,7 +7,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "android": {
-      "package": "com.careerbuddy.india",
+      "package": "com.careerbuddyindia.app",
       "versionCode": 1,
       "permissions": [
         "android.permission.INTERNET"

@@ -13,6 +13,7 @@ import {
   RefreshControl,
   Modal,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -300,7 +301,10 @@ export default function JobsScreen() {
             </View>
 
             {selectedJob && (
-              <ScrollView showsVerticalScrollIndicator={false}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScrollContent}
+              >
                 <Text style={styles.detailHeading}>{selectedJob.role}</Text>
                 <Text style={styles.detailSub}>{selectedJob.company} • {selectedJob.location}</Text>
 
@@ -311,7 +315,7 @@ export default function JobsScreen() {
                   </View>
                   <View style={styles.gridBox}>
                     <Text style={styles.gridTitle}>Experience Needed</Text>
-                    <Text style={styles.gridDesc}>{selectedJob.experience}</Text>
+                    <Text style={styles.gridDesc}>{selectedJob.experience || 'Freshers Eligible'}</Text>
                   </View>
                   <View style={styles.gridBox}>
                     <Text style={styles.gridTitle}>Job Mode</Text>
@@ -515,10 +519,12 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === 'android' ? 24 : 16,
+    maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -527,10 +533,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
     paddingBottom: 10,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   modalSheetTitle: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
   modalSheetSub: { fontSize: 11, color: '#64748B', marginTop: 1 },
+  modalScrollContent: {
+    paddingBottom: Platform.OS === 'android' ? 28 : 20,
+  },
   detailHeading: { fontSize: 19, fontWeight: '800', color: '#0F172A' },
   detailSub: { fontSize: 13, color: '#64748B', marginTop: 2, marginBottom: 16 },
   gridSummary: {
@@ -566,7 +575,7 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
     borderRadius: 10,
     padding: 12,
-    marginBottom: 18,
+    marginBottom: 16,
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
@@ -574,13 +583,15 @@ const styles = StyleSheet.create({
   antiFraudText: { fontSize: 11, color: '#991B1B', flex: 1, lineHeight: 16 },
   modalApplyBtn: {
     backgroundColor: '#2563EB',
-    height: 44,
-    borderRadius: 10,
+    height: 48,
+    borderRadius: 12,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 10,
+    marginTop: 8,
+    marginBottom: 12,
+    elevation: 3,
   },
-  modalApplyText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
-});
+  modalApplyText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+});          

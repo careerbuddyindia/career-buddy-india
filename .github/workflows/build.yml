@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android App Bundle & APK
 on:
   workflow_dispatch:
 
@@ -38,18 +38,25 @@ jobs:
             --bundle-output android/app/src/main/assets/index.android.bundle \
             --assets-dest android/app/src/main/res/ || npx expo export --platform android
 
-      - name: Configure Debug Keystore for Release
+      - name: Configure Keystore
         working-directory: android/app
         run: |
           sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' build.gradle || true
 
-      - name: Build Standalone APK
+      - name: Build Both AAB & APK
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
+        run: |
+          ./gradlew bundleRelease assembleRelease --no-daemon
 
-      - name: Upload Standalone APK
+      - name: Upload Test APK
         uses: actions/upload-artifact@v4
         with:
-          name: career-buddy-apk
+          name: career-buddy-test-apk
           path: android/app/build/outputs/apk/release/*.apk
+
+      - name: Upload Play Store AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: career-buddy-playstore-aab
+          path: android/app/build/outputs/bundle/release/*.aab
           

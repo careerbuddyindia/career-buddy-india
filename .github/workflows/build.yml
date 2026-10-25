@@ -38,10 +38,37 @@ jobs:
             --bundle-output android/app/src/main/assets/index.android.bundle \
             --assets-dest android/app/src/main/res/ || npx expo export --platform android
 
-      - name: Configure Keystore
+      - name: Generate Release Keystore
         working-directory: android/app
         run: |
-          sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' build.gradle || true
+          keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore \
+            -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "MySecurePassword123" -keypass "MySecurePassword123" \
+            -dname "CN=Career Buddy, OU=App, O=Company, L=City, S=State, C=IN"
+
+      - name: Configure Release Signing in Gradle
+        working-directory: android/app
+        run: |
+          cat << 'EOF' > update_signing.py
+          with open("build.gradle", "r") as f:
+              content = f.read()
+
+          release_signing = """
+                  release {
+                      storeFile file('release.keystore')
+                      storePassword 'MySecurePassword123'
+                      keyAlias 'my-key-alias'
+                      keyPassword 'MySecurePassword123'
+                  }
+          """
+          
+          if "signingConfigs {" in content:
+              content = content.replace("signingConfigs {", "signingConfigs {" + release_signing, 1)
+
+          with open("build.gradle", "w") as f:
+              f.write(content)
+          EOF
+          python3 update_signing.py
 
       - name: Build Both AAB & APK
         working-directory: android

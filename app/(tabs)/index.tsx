@@ -50,7 +50,7 @@ export default function JobsScreen() {
         .order('id', { ascending: false });
 
       if (error) {
-        Alert.alert('Notice', 'Unable to fetch real-time jobs right now.');
+        Alert.alert('Notice', 'Unable to fetch real-time jobs. Showing default listings.');
       } else if (data && data.length > 0) {
         setJobs(data as JobItem[]);
       }
@@ -95,52 +95,60 @@ export default function JobsScreen() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleApplyEmail = (job: JobItem) => {
-    const subject = encodeURIComponent(`Application for ${job.role} - Career Buddy India`);
-    const body = encodeURIComponent(
-      `Dear Hiring Team at ${job.company},\n\nI am applying for the ${job.role} position listed on Career Buddy India.\n\nKey Highlights:\n- Qualification/Experience: ${job.experience || 'Fresher'}\n- Preferred Mode: ${job.type || 'Full-time'}\n\nPlease find my resume attached.\n\nWarm regards,\nCandidate`
-    );
-    Linking.openURL(`mailto:${job.contact_email}?subject=${subject}&body=${body}`).catch(() => {
-      Alert.alert('Email App Missing', `Please email directly to: ${job.contact_email}`);
-    });
-  };
-
-  const handleApplyWhatsApp = (job: JobItem) => {
-    const msg = encodeURIComponent(
-      `Hello HR Team,\nI came across the opening for *${job.role}* at *${job.company}* via Career Buddy India.\n\nI would like to submit my application for this role.\nCould you please let me know the procedure to share my resume?\n\nThank you!`
-    );
-    Linking.openURL(`whatsapp://send?phone=${job.whatsapp}&text=${msg}`).catch(() => {
-      Alert.alert('Notice', 'WhatsApp is not installed on this device.');
-    });
+  const handleApplyNow = (job: JobItem) => {
+    // Agar company email ho toh direct professional format open karein
+    if (job.contact_email && job.contact_email.includes('@')) {
+      const subject = encodeURIComponent(`Application: ${job.role} - [Your Name]`);
+      const body = encodeURIComponent(
+        `Dear Hiring Team at ${job.company},\n\nI am writing to apply for the ${job.role} position found on Career Buddy India.\n\nProfile Details:\n- Experience: ${job.experience || 'Fresher'}\n- Role Type: ${job.type || 'Full-time'}\n\nPlease review my attached resume. I am available for an immediate interview.\n\nThank you,\nCandidate`
+      );
+      Linking.openURL(`mailto:${job.contact_email}?subject=${subject}&body=${body}`).catch(() => {
+        Alert.alert('Application Desk', `Please send your resume to: ${job.contact_email}`);
+      });
+    } else {
+      Alert.alert('Application Notice', 'Online application will open shortly for this hiring.');
+    }
   };
 
   const handleShareJob = async (job: JobItem) => {
     try {
       await Share.share({
-        message: `📢 Opening: ${job.role} at ${job.company} (${job.location})\n💰 Salary: ${job.salary}\nApply via Career Buddy India!`,
+        message: `📢 Vacancy: ${job.role} at ${job.company}\n📍 Location: ${job.location}\n💰 Salary: ${job.salary}\nApply free on Career Buddy India App!`,
       });
     } catch {}
   };
 
+  const getAvatarLetter = (name: string) => {
+    return (name && name.length > 0) ? name.charAt(0).toUpperCase() : 'C';
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Top Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Career Buddy India</Text>
-          <Text style={styles.headerSubtitle}>Verified Private Jobs for Freshers</Text>
+          <Text style={styles.brandTitle}>Career Buddy</Text>
+          <Text style={styles.brandSubtitle}>Verified Entry-Level & Fresher Jobs</Text>
         </View>
-        <Ionicons name="sparkles" size={24} color="#2563EB" />
+        <View style={styles.verifiedTag}>
+          <Ionicons name="checkmark-seal" size={18} color="#059669" />
+          <Text style={styles.verifiedText}>Verified</Text>
+        </View>
       </View>
 
-      <View style={styles.alertBanner}>
-        <Ionicons name="shield-checkmark" size={16} color="#B45309" />
-        <Text style={styles.alertText}>100% Free jobs. Never pay any fee for interview calls!</Text>
+      {/* Safety Notice Banner */}
+      <View style={styles.trustBanner}>
+        <Ionicons name="shield-checkmark" size={16} color="#047857" />
+        <Text style={styles.trustBannerText}>
+          100% Free Career Portal • Never pay any registration or training fee!
+        </Text>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#94A3B8" style={{ marginRight: 8 }} />
+      {/* Search Input */}
+      <View style={styles.searchBox}>
+        <Ionicons name="search-outline" size={18} color="#64748B" style={{ marginRight: 8 }} />
         <TextInput
-          placeholder="Search by role, city, or company..."
+          placeholder="Search by job title, company, or city..."
           placeholderTextColor="#94A3B8"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -153,7 +161,8 @@ export default function JobsScreen() {
         ) : null}
       </View>
 
-      <View style={styles.filterRow}>
+      {/* Category Filter Chips */}
+      <View style={styles.filterContainer}>
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -163,14 +172,14 @@ export default function JobsScreen() {
             <TouchableOpacity
               onPress={() => setSelectedCategory(item)}
               style={[
-                styles.categoryChip,
-                selectedCategory === item && styles.categoryChipActive,
+                styles.filterChip,
+                selectedCategory === item && styles.filterChipActive,
               ]}
             >
               <Text
                 style={[
-                  styles.categoryText,
-                  selectedCategory === item && styles.categoryTextActive,
+                  styles.filterChipText,
+                  selectedCategory === item && styles.filterChipTextActive,
                 ]}
               >
                 {item}
@@ -180,163 +189,180 @@ export default function JobsScreen() {
         />
       </View>
 
+      {/* Job Feed List */}
       {loading ? (
-        <View style={styles.centerBox}>
-          <ActivityIndicator size="large" color="#2563EB" />
-          <Text style={styles.loadingText}>Fetching active openings...</Text>
+        <View style={styles.centeredState}>
+          <ActivityIndicator size="large" color="#0F172A" />
+          <Text style={styles.stateText}>Loading verified openings...</Text>
         </View>
       ) : (
         <FlatList
           data={filteredJobs}
           keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
-            <View style={styles.centerBox}>
-              <Ionicons name="briefcase-outline" size={44} color="#CBD5E1" />
-              <Text style={styles.emptyText}>No jobs found in this section.</Text>
+            <View style={styles.centeredState}>
+              <Ionicons name="briefcase-outline" size={48} color="#CBD5E1" />
+              <Text style={styles.emptyHeading}>No Jobs Found</Text>
+              <Text style={styles.stateText}>Try clearing your search or category filter.</Text>
             </View>
           }
           renderItem={({ item }) => {
             const isBookmarked = savedJobIds.includes(item.id);
             return (
-              <TouchableOpacity
-                style={styles.card}
-                activeOpacity={0.85}
-                onPress={() => setSelectedJob(item)}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={{ flex: 1, paddingRight: 8 }}>
-                    <Text style={styles.roleText}>{item.role}</Text>
-                    <Text style={styles.companyText}>{item.company}</Text>
+              <View style={styles.naukriCard}>
+                {/* Card Top: Logo Initial + Title + Save */}
+                <View style={styles.cardTopRow}>
+                  <View style={styles.companyAvatar}>
+                    <Text style={styles.avatarText}>{getAvatarLetter(item.company)}</Text>
                   </View>
-                  <View style={styles.topCardActions}>
-                    <TouchableOpacity onPress={() => toggleBookmark(item.id)} style={styles.iconBtn}>
+                  <View style={styles.titleColumn}>
+                    <Text style={styles.jobRole} numberOfLines={1}>{item.role}</Text>
+                    <Text style={styles.companyName} numberOfLines={1}>{item.company}</Text>
+                  </View>
+                  <View style={styles.actionIconGroup}>
+                    <TouchableOpacity onPress={() => toggleBookmark(item.id)} style={styles.iconPadding}>
                       <Ionicons
-                        name={isBookmarked ? 'heart' : 'heart-outline'}
+                        name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                         size={22}
-                        color={isBookmarked ? '#EF4444' : '#64748B'}
+                        color={isBookmarked ? '#2563EB' : '#94A3B8'}
                       />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleShareJob(item)} style={styles.iconBtn}>
-                      <Ionicons name="share-social-outline" size={20} color="#64748B" />
+                    <TouchableOpacity onPress={() => handleShareJob(item)} style={styles.iconPadding}>
+                      <Ionicons name="share-social-outline" size={20} color="#94A3B8" />
                     </TouchableOpacity>
                   </View>
                 </View>
 
-                <View style={styles.metaRow}>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="location-outline" size={15} color="#64748B" />
-                    <Text style={styles.metaText}>{item.location}</Text>
+                {/* Details Strip */}
+                <View style={styles.infoStrip}>
+                  <View style={styles.stripItem}>
+                    <Ionicons name="briefcase-outline" size={14} color="#64748B" />
+                    <Text style={styles.stripText}>{item.experience || 'Fresher'}</Text>
                   </View>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="cash-outline" size={15} color="#059669" />
-                    <Text style={[styles.metaText, { color: '#059669', fontWeight: 'bold' }]}>
+                  <View style={styles.stripItem}>
+                    <Ionicons name="wallet-outline" size={14} color="#059669" />
+                    <Text style={[styles.stripText, { color: '#059669', fontWeight: '700' }]}>
                       {item.salary}
                     </Text>
                   </View>
-                </View>
-
-                <View style={styles.tagRow}>
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{item.experience || 'Fresher'}</Text>
-                  </View>
-                  <View style={[styles.badge, { backgroundColor: '#EFF6FF' }]}>
-                    <Text style={[styles.badgeText, { color: '#2563EB' }]}>{item.type || 'Full-time'}</Text>
-                  </View>
-                  <View style={[styles.badge, { backgroundColor: '#F0FDF4' }]}>
-                    <Text style={[styles.badgeText, { color: '#16A34A' }]}>{item.category}</Text>
+                  <View style={styles.stripItem}>
+                    <Ionicons name="location-outline" size={14} color="#64748B" />
+                    <Text style={styles.stripText} numberOfLines={1}>{item.location}</Text>
                   </View>
                 </View>
 
-                <View style={styles.actionRow}>
+                {/* Tags Pill */}
+                <View style={styles.badgeRow}>
+                  <View style={styles.pillBadge}>
+                    <Text style={styles.pillText}>{item.type || 'Full Time'}</Text>
+                  </View>
+                  <View style={[styles.pillBadge, { backgroundColor: '#EFF6FF' }]}>
+                    <Text style={[styles.pillText, { color: '#2563EB' }]}>{item.category}</Text>
+                  </View>
+                  <View style={[styles.pillBadge, { backgroundColor: '#F0FDF4' }]}>
+                    <Text style={[styles.pillText, { color: '#16A34A' }]}>Direct Hiring</Text>
+                  </View>
+                </View>
+
+                {/* Buttons Action Bar */}
+                <View style={styles.cardFooter}>
                   <TouchableOpacity
-                    style={[styles.actionBtn, styles.emailBtn]}
-                    onPress={() => handleApplyEmail(item)}
+                    style={styles.detailsBtn}
+                    onPress={() => setSelectedJob(item)}
                   >
-                    <Ionicons name="mail" size={16} color="#FFFFFF" />
-                    <Text style={styles.actionBtnText}>Send CV (Email)</Text>
+                    <Text style={styles.detailsBtnText}>View Details</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.actionBtn, styles.whatsappBtn]}
-                    onPress={() => handleApplyWhatsApp(item)}
+                    style={styles.applyBtn}
+                    onPress={() => handleApplyNow(item)}
                   >
-                    <Ionicons name="logo-whatsapp" size={16} color="#FFFFFF" />
-                    <Text style={styles.actionBtnText}>WhatsApp HR</Text>
+                    <Text style={styles.applyBtnText}>Apply Now</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
+              </View>
             );
           }}
         />
       )}
 
-      {/* JOB DETAILS POPUP MODAL */}
+      {/* JOB DETAILS & INTERVIEW TIPS MODAL */}
       <Modal
         visible={!!selectedJob}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setSelectedJob(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Job Overview</Text>
+              <View>
+                <Text style={styles.modalSheetTitle}>Job Specifications</Text>
+                <Text style={styles.modalSheetSub}>Review role profile before applying</Text>
+              </View>
               <TouchableOpacity onPress={() => setSelectedJob(null)}>
-                <Ionicons name="close-circle" size={26} color="#94A3B8" />
+                <Ionicons name="close-circle" size={28} color="#94A3B8" />
               </TouchableOpacity>
             </View>
 
             {selectedJob && (
               <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={styles.detailRole}>{selectedJob.role}</Text>
-                <Text style={styles.detailCompany}>{selectedJob.company}</Text>
+                <Text style={styles.detailHeading}>{selectedJob.role}</Text>
+                <Text style={styles.detailSub}>{selectedJob.company} • {selectedJob.location}</Text>
 
-                <View style={styles.detailGrid}>
-                  <View style={styles.gridItem}>
-                    <Text style={styles.gridLabel}>Monthly Salary</Text>
-                    <Text style={styles.gridValue}>{selectedJob.salary}</Text>
+                <View style={styles.gridSummary}>
+                  <View style={styles.gridBox}>
+                    <Text style={styles.gridTitle}>Package Offered</Text>
+                    <Text style={styles.gridDesc}>{selectedJob.salary}</Text>
                   </View>
-                  <View style={styles.gridItem}>
-                    <Text style={styles.gridLabel}>Location</Text>
-                    <Text style={styles.gridValue}>{selectedJob.location}</Text>
+                  <View style={styles.gridBox}>
+                    <Text style={styles.gridTitle}>Experience Needed</Text>
+                    <Text style={styles.gridDesc}>{selectedJob.experience}</Text>
                   </View>
-                  <View style={styles.gridItem}>
-                    <Text style={styles.gridLabel}>Eligibility</Text>
-                    <Text style={styles.gridValue}>{selectedJob.experience}</Text>
+                  <View style={styles.gridBox}>
+                    <Text style={styles.gridTitle}>Job Mode</Text>
+                    <Text style={styles.gridDesc}>{selectedJob.type}</Text>
                   </View>
-                  <View style={styles.gridItem}>
-                    <Text style={styles.gridLabel}>Employment Type</Text>
-                    <Text style={styles.gridValue}>{selectedJob.type}</Text>
+                  <View style={styles.gridBox}>
+                    <Text style={styles.gridTitle}>Verification</Text>
+                    <Text style={[styles.gridDesc, { color: '#059669' }]}>Verified 100% Free</Text>
                   </View>
                 </View>
 
-                <View style={styles.safetyBox}>
-                  <Ionicons name="shield-half-outline" size={18} color="#D97706" />
-                  <Text style={styles.safetyText}>
-                    Direct HR Contact: Ensure your resume highlights basic computer knowledge and clear contact info.
+                {/* Candidate Interview Tips */}
+                <View style={styles.tipsBox}>
+                  <View style={styles.tipsTitleRow}>
+                    <Ionicons name="bulb-outline" size={18} color="#B45309" />
+                    <Text style={styles.tipsHeading}>Interview Preparation Tip</Text>
+                  </View>
+                  <Text style={styles.tipsText}>
+                    Always introduce yourself clearly in 60 seconds (Education, hobbies, strengths). Keep your documents ready in PDF format.
                   </Text>
                 </View>
 
-                <View style={styles.modalActions}>
-                  <TouchableOpacity
-                    style={[styles.actionBtn, styles.emailBtn]}
-                    onPress={() => handleApplyEmail(selectedJob)}
-                  >
-                    <Ionicons name="mail" size={16} color="#FFFFFF" />
-                    <Text style={styles.actionBtnText}>Email Resume</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.actionBtn, styles.whatsappBtn]}
-                    onPress={() => handleApplyWhatsApp(selectedJob)}
-                  >
-                    <Ionicons name="logo-whatsapp" size={16} color="#FFFFFF" />
-                    <Text style={styles.actionBtnText}>WhatsApp HR</Text>
-                  </TouchableOpacity>
+                {/* Anti-Fraud Disclaimer for Play Store Compliance */}
+                <View style={styles.antiFraudBox}>
+                  <Ionicons name="shield-alert-outline" size={18} color="#DC2626" />
+                  <Text style={styles.antiFraudText}>
+                    Career Buddy India never charges any fees from candidates. If any employer asks for money, do not pay and report immediately.
+                  </Text>
                 </View>
+
+                <TouchableOpacity
+                  style={styles.modalApplyBtn}
+                  onPress={() => {
+                    const target = selectedJob;
+                    setSelectedJob(null);
+                    handleApplyNow(target);
+                  }}
+                >
+                  <Text style={styles.modalApplyText}>Submit Application</Text>
+                  <Ionicons name="send" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
               </ScrollView>
             )}
           </View>
@@ -351,102 +377,160 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 10,
+    paddingBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B' },
-  headerSubtitle: { fontSize: 13, color: '#64748B', marginTop: 2 },
-  alertBanner: {
+  brandTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A', letterSpacing: -0.5 },
+  brandSubtitle: { fontSize: 12, color: '#64748B', marginTop: 1 },
+  verifiedTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 8,
+    gap: 4,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  verifiedText: { fontSize: 11, fontWeight: '700', color: '#065F46' },
+  trustBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 7,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#FDE68A',
+    borderBottomColor: '#D1FAE5',
+    gap: 6,
   },
-  alertText: { fontSize: 12, color: '#92400E', fontWeight: '600', marginLeft: 6, flex: 1 },
-  searchContainer: {
+  trustBannerText: { fontSize: 11, color: '#065F46', fontWeight: '600', flex: 1 },
+  searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginTop: 12,
     paddingHorizontal: 14,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    height: 46,
+    height: 44,
   },
-  searchInput: { flex: 1, fontSize: 14, color: '#1E293B' },
-  filterRow: { paddingHorizontal: 16, paddingVertical: 12 },
-  categoryChip: {
+  searchInput: { flex: 1, fontSize: 13, color: '#0F172A' },
+  filterContainer: { paddingHorizontal: 16, paddingVertical: 10 },
+  filterChip: {
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     marginRight: 8,
   },
-  categoryChipActive: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
-  categoryText: { fontSize: 13, color: '#64748B', fontWeight: '600' },
-  categoryTextActive: { color: '#FFFFFF' },
-  listContent: { paddingHorizontal: 16, paddingBottom: 35 },
-  centerBox: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
-  loadingText: { marginTop: 10, fontSize: 13, color: '#64748B' },
-  emptyText: { fontSize: 14, color: '#94A3B8', marginTop: 10 },
-  card: {
+  filterChipActive: { backgroundColor: '#0F172A', borderColor: '#0F172A' },
+  filterChipText: { fontSize: 12, color: '#64748B', fontWeight: '600' },
+  filterChipTextActive: { color: '#FFFFFF' },
+  listContainer: { paddingHorizontal: 16, paddingBottom: 40 },
+  centeredState: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
+  stateText: { fontSize: 12, color: '#64748B', marginTop: 8 },
+  emptyHeading: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginTop: 12 },
+  naukriCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  cardTopRow: { flexDirection: 'row', alignItems: 'center' },
+  companyAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  topCardActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  iconBtn: { padding: 4 },
-  roleText: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
-  companyText: { fontSize: 14, color: '#64748B', marginTop: 2 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 14 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaText: { fontSize: 13, color: '#64748B' },
-  tagRow: { flexDirection: 'row', marginTop: 10, gap: 8, flexWrap: 'wrap' },
-  badge: {
+  avatarText: { fontSize: 18, fontWeight: '800', color: '#2563EB' },
+  titleColumn: { flex: 1 },
+  jobRole: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
+  companyName: { fontSize: 13, color: '#64748B', marginTop: 2 },
+  actionIconGroup: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  iconPadding: { padding: 4 },
+  infoStrip: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F8FAFC',
+  },
+  stripItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  stripText: { fontSize: 12, color: '#475569', fontWeight: '500' },
+  badgeRow: { flexDirection: 'row', gap: 6, marginTop: 12, flexWrap: 'wrap' },
+  pillBadge: {
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
-  badgeText: { fontSize: 11, fontWeight: '600', color: '#475569' },
-  actionRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  actionBtn: {
+  pillText: { fontSize: 11, fontWeight: '600', color: '#475569' },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  detailsBtn: {
     flex: 1,
-    height: 40,
+    height: 38,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  detailsBtnText: { fontSize: 13, fontWeight: '700', color: '#475569' },
+  applyBtn: {
+    flex: 1.2,
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
   },
-  emailBtn: { backgroundColor: '#2563EB' },
-  whatsappBtn: { backgroundColor: '#16A34A' },
-  actionBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
-  modalOverlay: {
+  applyBtnText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+  modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  modalSheet: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
-    maxHeight: '75%',
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -455,37 +539,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
     paddingBottom: 10,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
-  detailRole: { fontSize: 19, fontWeight: '800', color: '#1E293B' },
-  detailCompany: { fontSize: 14, color: '#64748B', marginTop: 2, marginBottom: 16 },
-  detailGrid: {
+  modalSheetTitle: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
+  modalSheetSub: { fontSize: 11, color: '#64748B', marginTop: 1 },
+  detailHeading: { fontSize: 19, fontWeight: '800', color: '#0F172A' },
+  detailSub: { fontSize: 13, color: '#64748B', marginTop: 2, marginBottom: 16 },
+  gridSummary: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 16,
-  },
-  gridItem: {
-    width: '48%',
-    backgroundColor: '#F8FAFC',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  gridLabel: { fontSize: 11, color: '#64748B', fontWeight: '600' },
-  gridValue: { fontSize: 13, fontWeight: '700', color: '#0F172A', marginTop: 2 },
-  safetyBox: {
-    backgroundColor: '#FEF3C7',
-    padding: 12,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 18,
-  },
-  safetyText: { fontSize: 12, color: '#92400E', flex: 1, lineHeight: 18 },
-  modalActions: { flexDirection: 'row', gap: 10, paddingBottom: 10 },
-});
-                    
+    marg

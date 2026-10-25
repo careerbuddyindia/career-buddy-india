@@ -129,7 +129,7 @@ export default function JobsScreen() {
           <Text style={styles.brandSubtitle}>Verified Entry-Level & Fresher Jobs</Text>
         </View>
         <View style={styles.verifiedTag}>
-          <Ionicons name="checkmark-seal" size={18} color="#059669" />
+          <Ionicons name="shield-checkmark" size={16} color="#059669" />
           <Text style={styles.verifiedText}>Verified</Text>
         </View>
       </View>

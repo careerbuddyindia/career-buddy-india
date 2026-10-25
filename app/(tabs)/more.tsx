@@ -7,40 +7,38 @@ export default function MoreScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>Safety & Career Advice</Text>
-        <Text style={styles.subtitle}>Helpful resources and Google Play safety guidelines.</Text>
+        <Text style={styles.screenTitle}>Candidate Help & Policy</Text>
+        <Text style={styles.subtitle}>Play Store compliant recruitment guidance & safety standards.</Text>
 
-        <View style={styles.warningCard}>
-          <View style={styles.warningHead}>
-            <Ionicons name="warning" size={20} color="#DC2626" />
-            <Text style={styles.warningTitle}>Beware of Job Scams!</Text>
+        {/* Anti-Fraud Disclaimer */}
+        <View style={styles.alertCard}>
+          <View style={styles.alertHead}>
+            <Ionicons name="shield-alert" size={20} color="#DC2626" />
+            <Text style={styles.alertTitle}>Zero Fee Policy (No Scam Guarantee)</Text>
           </View>
-          <Text style={styles.warningBody}>
-            • Genuine companies never demand registration or document processing fees.{'\n'}
-            • Never share OTPs, bank passwords, or UPI PINs with anyone claiming to be HR.{'\n'}
-            • Always verify company credentials before attending online interviews.
+          <Text style={styles.alertBody}>
+            Career Buddy India provides 100% free career enablement. We strictly prohibit listing any recruiter or agency that asks for registration fees, processing charges, or training payments.
           </Text>
         </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.cardHeader}>5 Tips for Fresher Resume</Text>
-          <Text style={styles.cardBody}>
-            1. Keep it strictly to 1 page.{'\n'}
-            2. Clearly list your computer & language skills (e.g., Excel, Typing, English/Hindi).{'\n'}
-            3. Highlight academic projects or volunteer work.{'\n'}
-            4. Use a clear, standard email address.{'\n'}
-            5. Double-check for phone number errors.
+        {/* 4 Steps for Fresher Job Success */}
+        <View style={styles.card}>
+          <Text style={styles.cardHeader}>Fresher Preparation Checklist</Text>
+          <Text style={styles.stepItem}>1. <Text style={styles.boldText}>Keep Resume to 1 Page</Text>: Focus on education, projects, and basic computer skills (Excel, Typing).</Text>
+          <Text style={styles.stepItem}>2. <Text style={styles.boldText}>Direct Follow-ups</Text>: When applying, check email inbox & spam folder regularly for interview invites.</Text>
+          <Text style={styles.stepItem}>3. <Text style={styles.boldText}>Never Share Confidential Data</Text>: Never send OTPs, Aadhaar OTPs, or bank account credentials to anyone.</Text>
+        </View>
+
+        {/* Government Non-Affiliation Disclaimer */}
+        <View style={styles.legalBox}>
+          <Text style={styles.legalHeading}>Compliance Notice (Government Disclaimer)</Text>
+          <Text style={styles.legalText}>
+            Career Buddy India is a privately managed educational & private recruitment facilitation app. This app is NOT an official government entity, does NOT represent any government ministry, and does not conduct government recruitment examinations.
           </Text>
         </View>
 
-        <View style={styles.legalCard}>
-          <Text style={styles.legalTitle}>Official Disclaimer & Compliance</Text>
-          <Text style={styles.legalBody}>
-            Career Buddy India is an independent career enablement and listing platform designed to assist freshers and private job seekers. We are NOT associated with, authorized by, or representing any government department or official recruitment agency.
-          </Text>
-        </View>
-
-        <View style={styles.linksGroup}>
+        {/* Important Links */}
+        <View style={styles.linksCard}>
           <TouchableOpacity
             style={styles.linkRow}
             onPress={() => Linking.openURL('https://policies.google.com/privacy')}
@@ -52,15 +50,15 @@ export default function MoreScreen() {
 
           <TouchableOpacity
             style={styles.linkRow}
-            onPress={() => Linking.openURL('mailto:support@careerbuddy.sample.in')}
+            onPress={() => Linking.openURL('mailto:support@careerbuddyindia.in')}
           >
-            <Ionicons name="headset-outline" size={20} color="#2563EB" />
-            <Text style={styles.linkText}>Report Fake Job / Help Desk</Text>
+            <Ionicons name="mail-unread-outline" size={20} color="#2563EB" />
+            <Text style={styles.linkText}>Report Suspicious Recruiter</Text>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.footerNote}>Career Buddy India • Version 1.0.0 (Production Ready)</Text>
+        <Text style={styles.versionText}>Career Buddy India • Release Version 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -69,44 +67,45 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F8FAFC' },
   container: { padding: 16, paddingBottom: 40 },
-  screenTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B' },
+  screenTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A' },
   subtitle: { fontSize: 13, color: '#64748B', marginTop: 4, marginBottom: 16 },
-  warningCard: {
+  alertCard: {
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
-  warningHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  warningTitle: { fontSize: 15, fontWeight: '700', color: '#B91C1C' },
-  warningBody: { fontSize: 13, color: '#991B1B', lineHeight: 20 },
-  infoCard: {
+  alertHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  alertTitle: { fontSize: 14, fontWeight: '700', color: '#B91C1C' },
+  alertBody: { fontSize: 12, color: '#991B1B', lineHeight: 18 },
+  card: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
-  cardHeader: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 8 },
-  cardBody: { fontSize: 13, color: '#475569', lineHeight: 22 },
-  legalCard: {
+  cardHeader: { fontSize: 15, fontWeight: '700', color: '#0F172A', marginBottom: 10 },
+  stepItem: { fontSize: 13, color: '#475569', lineHeight: 22, marginBottom: 6 },
+  boldText: { fontWeight: '700', color: '#0F172A' },
+  legalBox: {
     backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    padding: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  legalTitle: { fontSize: 13, fontWeight: '700', color: '#334155', marginBottom: 4 },
-  legalBody: { fontSize: 12, color: '#64748B', lineHeight: 18 },
-  linksGroup: {
+  legalHeading: { fontSize: 12, fontWeight: '700', color: '#334155', marginBottom: 4 },
+  legalText: { fontSize: 11, color: '#64748B', lineHeight: 16 },
+  linksCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 20,
   },
@@ -115,9 +114,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#F8FAFC',
     gap: 12,
   },
-  linkText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1E293B' },
-  footerNote: { textAlign: 'center', fontSize: 11, color: '#94A3B8', marginTop: 10 },
+  linkText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#0F172A' },
+  versionText: { textAlign: 'center', fontSize: 11, color: '#94A3B8', marginTop: 8 },
 });

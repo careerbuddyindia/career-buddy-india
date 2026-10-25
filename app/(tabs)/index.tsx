@@ -96,11 +96,10 @@ export default function JobsScreen() {
   });
 
   const handleApplyNow = (job: JobItem) => {
-    // Agar company email ho toh direct professional format open karein
     if (job.contact_email && job.contact_email.includes('@')) {
       const subject = encodeURIComponent(`Application: ${job.role} - [Your Name]`);
       const body = encodeURIComponent(
-        `Dear Hiring Team at ${job.company},\n\nI am writing to apply for the ${job.role} position found on Career Buddy India.\n\nProfile Details:\n- Experience: ${job.experience || 'Fresher'}\n- Role Type: ${job.type || 'Full-time'}\n\nPlease review my attached resume. I am available for an immediate interview.\n\nThank you,\nCandidate`
+        `Dear Hiring Team at ${job.company},\n\nI am applying for the ${job.role} position found on Career Buddy India.\n\nKey Highlights:\n- Qualification/Experience: ${job.experience || 'Fresher'}\n- Role Type: ${job.type || 'Full-time'}\n\nPlease review my attached resume. I am available for an immediate interview.\n\nThank you,\nCandidate`
       );
       Linking.openURL(`mailto:${job.contact_email}?subject=${subject}&body=${body}`).catch(() => {
         Alert.alert('Application Desk', `Please send your resume to: ${job.contact_email}`);
@@ -124,7 +123,6 @@ export default function JobsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Top Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.brandTitle}>Career Buddy</Text>
@@ -136,7 +134,6 @@ export default function JobsScreen() {
         </View>
       </View>
 
-      {/* Safety Notice Banner */}
       <View style={styles.trustBanner}>
         <Ionicons name="shield-checkmark" size={16} color="#047857" />
         <Text style={styles.trustBannerText}>
@@ -144,7 +141,6 @@ export default function JobsScreen() {
         </Text>
       </View>
 
-      {/* Search Input */}
       <View style={styles.searchBox}>
         <Ionicons name="search-outline" size={18} color="#64748B" style={{ marginRight: 8 }} />
         <TextInput
@@ -161,7 +157,6 @@ export default function JobsScreen() {
         ) : null}
       </View>
 
-      {/* Category Filter Chips */}
       <View style={styles.filterContainer}>
         <FlatList
           horizontal
@@ -189,7 +184,6 @@ export default function JobsScreen() {
         />
       </View>
 
-      {/* Job Feed List */}
       {loading ? (
         <View style={styles.centeredState}>
           <ActivityIndicator size="large" color="#0F172A" />
@@ -213,7 +207,6 @@ export default function JobsScreen() {
             const isBookmarked = savedJobIds.includes(item.id);
             return (
               <View style={styles.naukriCard}>
-                {/* Card Top: Logo Initial + Title + Save */}
                 <View style={styles.cardTopRow}>
                   <View style={styles.companyAvatar}>
                     <Text style={styles.avatarText}>{getAvatarLetter(item.company)}</Text>
@@ -236,7 +229,6 @@ export default function JobsScreen() {
                   </View>
                 </View>
 
-                {/* Details Strip */}
                 <View style={styles.infoStrip}>
                   <View style={styles.stripItem}>
                     <Ionicons name="briefcase-outline" size={14} color="#64748B" />
@@ -254,7 +246,6 @@ export default function JobsScreen() {
                   </View>
                 </View>
 
-                {/* Tags Pill */}
                 <View style={styles.badgeRow}>
                   <View style={styles.pillBadge}>
                     <Text style={styles.pillText}>{item.type || 'Full Time'}</Text>
@@ -267,7 +258,6 @@ export default function JobsScreen() {
                   </View>
                 </View>
 
-                {/* Buttons Action Bar */}
                 <View style={styles.cardFooter}>
                   <TouchableOpacity
                     style={styles.detailsBtn}
@@ -290,7 +280,7 @@ export default function JobsScreen() {
         />
       )}
 
-      {/* JOB DETAILS & INTERVIEW TIPS MODAL */}
+      {/* JOB DETAILS POPUP */}
       <Modal
         visible={!!selectedJob}
         animationType="slide"
@@ -333,7 +323,6 @@ export default function JobsScreen() {
                   </View>
                 </View>
 
-                {/* Candidate Interview Tips */}
                 <View style={styles.tipsBox}>
                   <View style={styles.tipsTitleRow}>
                     <Ionicons name="bulb-outline" size={18} color="#B45309" />
@@ -344,7 +333,6 @@ export default function JobsScreen() {
                   </Text>
                 </View>
 
-                {/* Anti-Fraud Disclaimer for Play Store Compliance */}
                 <View style={styles.antiFraudBox}>
                   <Ionicons name="shield-alert-outline" size={18} color="#DC2626" />
                   <Text style={styles.antiFraudText}>
@@ -549,4 +537,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marg
+    marginBottom: 16,
+  },
+  gridBox: {
+    width: '48%',
+    backgroundColor: '#F8FAFC',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  gridTitle: { fontSize: 11, color: '#64748B', fontWeight: '600' },
+  gridDesc: { fontSize: 13, fontWeight: '700', color: '#0F172A', marginTop: 2 },
+  tipsBox: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+  },
+  tipsTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  tipsHeading: { fontSize: 13, fontWeight: '700', color: '#92400E' },
+  tipsText: { fontSize: 12, color: '#78350F', lineHeight: 18 },
+  antiFraudBox: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 18,
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  antiFraudText: { fontSize: 11, color: '#991B1B', flex: 1, lineHeight: 16 },
+  modalApplyBtn: {
+    backgroundColor: '#2563EB',
+    height: 44,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  modalApplyText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+});

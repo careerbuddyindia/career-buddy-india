@@ -44,7 +44,16 @@ jobs:
             -alias careerbuddy -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android123 -keypass android123 \
             -dname "CN=Career Buddy, OU=Mobile, O=CareerBuddy, L=Delhi, ST=Delhi, C=IN"
+      - name: Export Upload Certificate for Play Store
+        run: |
+         keytool -export -rfc -keystore release.keystore -alias careerbuddy -file upload_cert.pem -storepass android123
 
+      - name: Upload Certificate to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: playstore-upload-cert
+          path: upload_cert.pem
+        
       - name: Force Release Signing Configuration in Gradle
         working-directory: android/app
         run: |

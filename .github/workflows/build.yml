@@ -53,7 +53,8 @@ jobs:
         with:
           name: playstore-upload-cert
           path: upload_cert.pem
-        
+                release.keystore
+                
       - name: Force Release Signing Configuration in Gradle
         working-directory: android/app
         run: |

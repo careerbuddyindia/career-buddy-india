@@ -8,7 +8,7 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.careerbuddyindia.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "android.permission.INTERNET"
       ]
